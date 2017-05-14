@@ -21,7 +21,7 @@ SDL_LIBS != pkg-config --libs sdl
 LIB_VERSION = 1.0
 
 CFLAGS ?= -O3 -Wall -fPIC
-QUIRC_CFLAGS = -Ilib $(CFLAGS) $(SDL_CFLAGS)
+QUIRC_CFLAGS = -Ilib $(CFLAGS) $(SDL_CFLAGS) -fPIC
 LIB_OBJ = \
     lib/decode.o \
     lib/identify.o \
@@ -34,7 +34,8 @@ DEMO_OBJ = \
     demo/dthash.o \
     demo/demoutil.o
 
-all: libquirc.so qrtest inspect quirc-demo quirc-scanner
+all: libquirc.so
+#qrtest inspect quirc-demo quirc-scanner
 
 qrtest: tests/dbgutil.o tests/qrtest.o libquirc.a
 	$(CC) -o $@ tests/dbgutil.o tests/qrtest.o libquirc.a $(LDFLAGS) -lm -ljpeg -lpng
@@ -54,7 +55,8 @@ libquirc.a: $(LIB_OBJ)
 	ranlib $@
 
 .PHONY: libquirc.so
-libquirc.so: libquirc.so.$(LIB_VERSION)
+libquirc.so: $(LIB_OBJ)
+	$(CC) -shared -o $@ $(LIB_OBJ) $(LDFLAGS) -lm
 
 libquirc.so.$(LIB_VERSION): $(LIB_OBJ)
 	$(CC) -shared -o $@ $(LIB_OBJ) $(LDFLAGS) -lm
